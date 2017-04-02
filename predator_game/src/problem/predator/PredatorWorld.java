@@ -8,18 +8,18 @@ import problem.RNG;
 import problem.learning.Problem;
 
 /**
- *
- * @author timbrys
- * Updated by Lev Levin
+ * @author timbrys.
+ * Updated by Lev Levin.
+ * Updated by Moshe Cohen.
  */
-public class PredatorWorld extends Problem{
+public class PredatorWorld extends Problem {
     private int size;
     private int nrPredators;
     private Animal[][] map;
     private Animal[] aPredators;
     private Animal[] aPreys;
     
-    public PredatorWorld(int size, int nrPredators, IPredatorCreator predatorCreator){
+    public PredatorWorld (int size, int nrPredators, IPredatorCreator predatorCreator) {
         this.size = size;
         this.nrPredators = nrPredators;
         
@@ -45,13 +45,15 @@ public class PredatorWorld extends Problem{
         }
     }
     
-    public int getSize(){
+    public int getSize() {
         return size;
     }
     
-    public int getNumStates() { return size * size; }
+    public int getNumStates() {
+        return size * size;
+    }
 
-    //reinitializes the world, randomly placing the predators and prey
+    // Initialize the world again, randomly placing the predators and prey
     public void reset(){
         this.map = new Animal[size][size];
         for(int i=0; i<nrPredators; i++){
@@ -138,21 +140,21 @@ public class PredatorWorld extends Problem{
         }
     }
     
-    public Animal[] getPredators(){
+    public Animal[] getPredators() {
         return aPredators;
     }
     
-    public Animal[] getPreys(){
+    public Animal[] getPreys() {
         return aPreys;
     }
 
     @Override
     public void update(boolean isLearningStage) {
-        for(int i=0; i<aPreys.length; i++){
-            move(aPreys[i], isLearningStage);
+        for (Animal aPrey : aPreys) {
+            move(aPrey, isLearningStage);
         }
-        for(int i=0; i<aPredators.length; i++){
-            move(aPredators[i], isLearningStage);
+        for (Animal aPredator : aPredators) {
+            move(aPredator, isLearningStage);
         }
     }
     
@@ -160,42 +162,25 @@ public class PredatorWorld extends Problem{
         int iteration = 0;
         while(!isGoalReached() ){
             update(isLearningStage);
-
-            /*for(int i=0; i<aPredators.length; i++) {
-                System.out.println("Predator#" + i + ": " + aPredators[i].x + "," + aPredators[i].y);
-            }
-            for(int j=0; j<aPreys.length; j++){
-                System.out.println("Prey#" + j + ": " + aPreys[j].x + "," + aPreys[j].y);
-            }*/
-
             iteration++;
         }
 
-        //System.out.println("Iteration - " + iteration);
+        System.out.println("Iteration - " + iteration);
 
-        //if the prey was caught, reward the predators with a 1
-        for(int i=0; i<aPredators.length; i++){
-            if(isGoalReached() && isLearningStage){
-                aPredators[i].reward(1);
+        // if the prey was caught, reward the predators with a 1
+        if(isGoalReached() && isLearningStage) {
+            for (Animal aPredator : aPredators) {
+                aPredator.reward(1);
             }
         }
         return iteration;
     }
-
-    public long getUpdatesNumber() {
-        long result = 0;
-        for (int i = 0; i < aPredators.length; i++) {
-            result += aPredators[i].getUpdatesNumber();
-        }
-
-        return result;
-    }
     
     //check if the prey is caught
     public boolean isGoalReached(){
-        for(int i=0; i<aPredators.length; i++){
-            for(int j=0; j<aPreys.length; j++){
-                if(aPredators[i].x == aPreys[j].x && aPredators[i].y == aPreys[j].y){
+        for (Animal aPredator : aPredators) {
+            for (Animal aPrey : aPreys) {
+                if (aPredator.x == aPrey.x && aPredator.y == aPrey.y) {
                     return true;
                 }
             }
@@ -203,30 +188,30 @@ public class PredatorWorld extends Problem{
         return false;
     }
     
-    //print world
+    // print world
     public String toString(){
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for(int i=0; i<size; i++){
             for(int j=0; j<size; j++){
                 boolean set = false;
                 for(int l=0; l<aPredators.length; l++){
                     if(aPredators[l] != null && aPredators[l].x == j && aPredators[l].y == i){
-                        s += "x";
+                        s.append("x");
                         set = true;
                         break;
                     }
                     if(l < aPreys.length && aPreys[l] != null && aPreys[l].x == j && aPreys[l].y == i){
-                        s += "O";
+                        s.append("O");
                         set = true;
                         break;
                     }
                 }
                 if(!set)
-                    s += " ";
+                    s.append(" ");
             }
-            s += "\n";
+            s.append("\n");
         }
-        return s;
+        return s.toString();
     }
     
     @Override
