@@ -6,51 +6,49 @@ package problem.learning;
 
 import problem.RNG;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author timbrys
  * Updated by Lev Levin
  */
-public abstract class QLearningAgent extends LearningAgent{
+public abstract class QLearningAgent extends LearningAgent {
 
-    public QLearningAgent(Problem prob){
-        super(prob);
+    public QLearningAgent(Problem problemWorld){
+        super(problemWorld);
     }
 
     public int act(){
-        if(prevFa == null){
-            prevFa = tileCoding(getState(), prevAction);
+        if(previousFa == null){
+            previousFa = getTileCodingTiles(getState(), previousAction);
         }
 
-        return prevAction;
+        return previousAction;
     }
 
-    public void reward(double reward){
+    public void reward(double reward) {
 
-        //applies each time a different shaping to the base reward
+        // applies each time a different shaping to the base reward
         double delta = reward;
 
-        //delta = r - Q(s,a)
-        for (int i = 0; i < prevFa.length; i++) {
-            delta -= theta[prevFa[i]];
+        // delta = r - Q(s,a)
+        for (int i = 0; i < previousFa.length; i++) {
+            delta -= theta[previousFa[i]];
         }
 
         double[] state = getState();
 
         //finds activated weights for each action
-        int[][] Fas = new int[prob.getNumActions()][];
-        for(int i=0; i<prob.getNumActions(); i++){
-            Fas[i] = tileCoding(state, i);
+        int[][] Fas = new int[p_problemWorld.getNumActions()][];
+        for(int i = 0; i < p_problemWorld.getNumActions(); i++){
+            Fas[i] = getTileCodingTiles(state, i);
         }
 
         //will store Q-values for each objective-action pair (given current state)
-        double Qs[] = new double[prob.getNumActions()];
+        double Qs[] = new double[p_problemWorld.getNumActions()];
         double best = -Double.MAX_VALUE;
 
         //calculates Q-values and stores best for each objective
-        for(int i=0; i<prob.getNumActions(); i++){
+        for(int i = 0; i< p_problemWorld.getNumActions(); i++){
             for (int j = 0; j < Fas[i].length; j++) {
                 Qs[i] += theta[Fas[i][j]];
             }
@@ -71,34 +69,34 @@ public abstract class QLearningAgent extends LearningAgent{
         int action = 0;
         //greedy
         if (RNG.randomDouble() > epsilon) {
-            Qs = new double[prob.getNumActions()];
+            Qs = new double[p_problemWorld.getNumActions()];
 
             //each tile separately
-            double weights[][] = new double[prob.getNumActions()][nrTiles];
+            double weights[][] = new double[p_problemWorld.getNumActions()][nrTiles];
 
-            for(int i=0; i<prob.getNumActions(); i++){
+            for(int i = 0; i< p_problemWorld.getNumActions(); i++){
                 for (int j = 0; j < Fas[i].length; j++) {
                     Qs[i] += theta[Fas[i][j]];
                     weights[i][j] = theta[Fas[i][j]];
                 }
             }
             //adaptive or random objective selection + action selection
-            action = actionSelection(Qs);
+            action = selectBestAction(Qs);
             //random
         } else {
-            action = RNG.randomInt(prob.getNumActions());
+            action = RNG.randomInt(p_problemWorld.getNumActions());
             //resets all traces. we should check whether the random action
             //happens to be greedy wrt to one of the objectives
             resetEs();
         }
 
         //s' = s
-        prevFa = tileCoding(state, action);
-        prevAction = action;
+        previousFa = getTileCodingTiles(state, action);
+        previousAction = action;
 
         //update traces
-        for (int i = 0; i < prevFa.length; i++) {
-            es[prevFa[i]] = 1;
+        for (int i = 0; i < previousFa.length; i++) {
+            es[previousFa[i]] = 1;
         }
     }
 

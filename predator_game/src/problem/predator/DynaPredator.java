@@ -2,7 +2,6 @@ package problem.predator;
 
 import org.apache.commons.math3.util.Pair;
 import problem.RNG;
-import problem.learning.DoubleHashTable;
 import problem.learning.ShortHashTable;
 import problem.learning.SimilarityType;
 
@@ -31,13 +30,13 @@ public class DynaPredator extends QTablePredator{
 
         //Q(S,A) = R(S,A) + gamma * SUM_S'(T(S,A,S') * max_A' Q(S',A'))
         State currentState = getCurrentState();
-        double newValue = updateStateAction(prevState, prevAction, (int)reward);
+        double newValue = updateStateAction(prevState, previousAction, (int)reward);
 
         double best = -Double.MAX_VALUE;
         ArrayList<Integer> bestActions = new ArrayList<>();
 
         // Calculates max_A' Q(S',A')
-        for (int i = 0; i < prob.getNumActions(); i++) {
+        for (int i = 0; i < p_problemWorld.getNumActions(); i++) {
             double value = qTable.get(new StateAction(prevState, i));
             if (value >= best) {
                 if (value > best) {
@@ -49,7 +48,7 @@ public class DynaPredator extends QTablePredator{
             }
         }
 
-        updateQBySimilarity(prevState, prevAction, newValue, similarityType);
+        updateQBySimilarity(prevState, previousAction, newValue, similarityType);
         updateKRandomPairs();
 
         //action selection
@@ -68,9 +67,9 @@ public class DynaPredator extends QTablePredator{
 
     private void updateModel(double reward) {
         // Update Transaction Model
-        int targetStateIndex = getTargetStateIndex(this.prevState, this.prevAction, this.getCurrentState());
-        Transaction transaction = new Transaction(this.prevState, this.prevAction, targetStateIndex);
-        Transaction totalTransaction = new Transaction(this.prevState, this.prevAction, 25);
+        int targetStateIndex = getTargetStateIndex(this.prevState, this.previousAction, this.getCurrentState());
+        Transaction transaction = new Transaction(this.prevState, this.previousAction, targetStateIndex);
+        Transaction totalTransaction = new Transaction(this.prevState, this.previousAction, 25);
 
         // Update actual target state seen
         short newValue = (short)(transactionsModel.get(transaction) + 1);
@@ -185,7 +184,7 @@ public class DynaPredator extends QTablePredator{
             ArrayList<Integer> bestActions = new ArrayList<>();
 
             // Calculates max_A' Q(S',A')
-            for (int i = 0; i < prob.getNumActions(); i++) {
+            for (int i = 0; i < p_problemWorld.getNumActions(); i++) {
 
                 double value = qTable.get(new StateAction(possibleStates.get(index), i));
                 if (value >= best) {
@@ -232,7 +231,7 @@ public class DynaPredator extends QTablePredator{
     }
 
     private Pair<State, Integer> ChooseRandomStateAction() {
-        int randomAction = RNG.randomInt(prob.getNumActions());
+        int randomAction = RNG.randomInt(p_problemWorld.getNumActions());
         State randomState = new State();
         randomState.predDistX = (byte)RNG.randomInt(-19, 19);
         randomState.predDistY = (byte)RNG.randomInt(-19, 19);

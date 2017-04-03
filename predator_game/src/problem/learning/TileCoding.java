@@ -23,9 +23,9 @@ public class TileCoding {
 
         int i, j;
         int[] qstate = new int[variables.length];
-	int[] base = new int[variables.length];
-	int[] coordinates = new int[variables.length + 4];   /* one interval number per rel dimension */
-	int num_coordinates;
+        int[] base = new int[variables.length];
+        int[] coordinates = new int[variables.length + 4];   /* one interval number per rel dimension */
+        int num_coordinates;
 
         if (hash1 == -1) {
             num_coordinates = variables.length + 1;       // no additional hashing corrdinates
@@ -49,7 +49,7 @@ public class TileCoding {
             base[i] = 0;
         }
 
-        /*compute the tile numbers */
+        /* compute the tile numbers */
         for (j = 0; j < num_tilings; j++) {
 
             /* loop over each relevant dimension */

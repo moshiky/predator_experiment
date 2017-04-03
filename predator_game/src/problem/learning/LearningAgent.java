@@ -7,7 +7,6 @@ package problem.learning;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import problem.RNG;
 import problem.predator.State;
@@ -34,18 +33,18 @@ public abstract class LearningAgent{
     protected int nrTiles;
     protected int maxNrTiles;
 
-    //Represents the Q(S,A) function - represented by table
+    // Represents the Q(S,A) function - represented by table
     protected double[][] qs;
 
-    //previous action, and Q(S,A)
-    protected int prevAction;
-    protected int[] prevFa;
+    // Previous action, and Q(S,A)
+    protected int previousAction;
+    protected int[] previousFa;
 
-    //problem class, in this case predatorworld
-    protected Problem prob;
+    // Problem class
+    protected Problem p_problemWorld;
     
-    public LearningAgent(Problem prob){
-        this.prob = prob;
+    public LearningAgent(Problem problemWorld) {
+        this.p_problemWorld = problemWorld;
 
         maxNrTiles = 4096;
         nrTiles = 14;
@@ -55,40 +54,39 @@ public abstract class LearningAgent{
         gamma = 0.99;
     }
     
-    public void initialize(){
-        prevAction = RNG.randomInt(prob.getNumActions());
-        prevFa = null;
+    public void initialize() {
+        previousAction = RNG.randomInt(p_problemWorld.getNumActions());
+        previousFa = null;
 
         theta = new double[maxNrTiles];
         es = new double[maxNrTiles];
-        qs = new double[prob.getNumStates()][prob.getNumActions()];
+        qs = new double[p_problemWorld.getNumStates()][p_problemWorld.getNumActions()];
     }
 
-    public void resetEs(){
+    public void resetEs() {
         es = new double[maxNrTiles];
     }
 
     public abstract double[] getState();
 
-    protected int actionSelection(double[] QS){
-        double best = -Double.MAX_VALUE;
-        ArrayList<Integer> ibest = new ArrayList <Integer>();
+    protected int selectBestAction(double[] availableActionReturns) {
+        double bestActionReturn = -Double.MAX_VALUE;
+        ArrayList<Integer> bestActionIndexes = new ArrayList <>();
         
-        for(int i=0; i<QS.length; i++){
-            if(QS[i] >= best){
-                if(QS[i] > best){
-                    ibest.clear();
+        for (int actionIndex = 0 ; actionIndex < availableActionReturns.length ; actionIndex++) {
+            if (availableActionReturns[actionIndex] >= bestActionReturn) {
+                if (availableActionReturns[actionIndex] > bestActionReturn) {
+                    bestActionIndexes.clear();
                 }
-                ibest.add(i);
-                best = QS[i];
+                bestActionIndexes.add(actionIndex);
+                bestActionReturn = availableActionReturns[actionIndex];
             }
         }
         
-        int b = ibest.get(RNG.randomInt(ibest.size()));
-        return b;
+        return bestActionIndexes.get(RNG.randomInt(bestActionIndexes.size()));
     }
 
-    protected int[] tileCoding(double[] state, int action) {
+    protected int[] getTileCodingTiles(double[] state, int action) {
         int extra1 = action;
         int extra2 = -1;
         int extra3 = -1;

@@ -60,17 +60,17 @@ public class TCPredator extends Animal {
         double[] state = getState();
 
         //finds activated weights for each action
-        int[][] Fas = new int[prob.getNumActions()][];
-        for(int i=0; i<prob.getNumActions(); i++){
-            Fas[i] = tileCoding(state, i);
+        int[][] Fas = new int[p_problemWorld.getNumActions()][];
+        for(int i = 0; i< p_problemWorld.getNumActions(); i++){
+            Fas[i] = getTileCodingTiles(state, i);
         }
 
         //will store Q-values for each objective-action pair (given current state)
-        double Qs[] = new double[prob.getNumActions()];
+        double Qs[] = new double[p_problemWorld.getNumActions()];
         double best = -Double.MAX_VALUE;
 
         //calculates Q-values and stores best for each objective
-        for(int i=0; i<prob.getNumActions(); i++){
+        for(int i = 0; i< p_problemWorld.getNumActions(); i++){
             for (int j = 0; j < Fas[i].length; j++) {
                 Qs[i] += theta[Fas[i][j]];
             }
@@ -83,42 +83,42 @@ public class TCPredator extends Animal {
         int action = 0;
         //greedy
         if (RNG.randomDouble() > epsilon) {
-            Qs = new double[prob.getNumActions()];
+            Qs = new double[p_problemWorld.getNumActions()];
 
             //each tile separately
-            double weights[][] = new double[prob.getNumActions()][nrTiles];
+            double weights[][] = new double[p_problemWorld.getNumActions()][nrTiles];
 
-            for(int i=0; i<prob.getNumActions(); i++){
+            for(int i = 0; i< p_problemWorld.getNumActions(); i++){
                 for (int j = 0; j < Fas[i].length; j++) {
                     Qs[i] += theta[Fas[i][j]];
                     weights[i][j] = theta[Fas[i][j]];
                 }
             }
             //adaptive or random objective selection + action selection
-            action = actionSelection(Qs);
+            action = selectBestAction(Qs);
             //random
         } else {
-            action = RNG.randomInt(prob.getNumActions());
+            action = RNG.randomInt(p_problemWorld.getNumActions());
         }
 
-        prevAction = action;
+        previousAction = action;
 
 
         /*double[] state = getState();
 
         //finds activated weights for each action
-        int[][] Fas = new int[prob.getNumActions()][];
-        for(int i=0; i<prob.getNumActions(); i++){
-            Fas[i] = tileCoding(state, i);
+        int[][] Fas = new int[p_problemWorld.getNumActions()][];
+        for(int i=0; i<p_problemWorld.getNumActions(); i++){
+            Fas[i] = getTileCodingTiles(state, i);
         }
 
 
-        double[] Qs = new double[prob.getNumActions()];
+        double[] Qs = new double[p_problemWorld.getNumActions()];
 
         //each tile separately
-        double weights[][] = new double[prob.getNumActions()][nrTiles];
+        double weights[][] = new double[p_problemWorld.getNumActions()][nrTiles];
 
-        for (int i = 0; i < prob.getNumActions(); i++) {
+        for (int i = 0; i < p_problemWorld.getNumActions(); i++) {
             for (int j = 0; j < Fas[i].length; j++) {
                 Qs[i] += theta[Fas[i][j]];
                 weights[i][j] = theta[Fas[i][j]];
@@ -126,10 +126,10 @@ public class TCPredator extends Animal {
         }
 
         //adaptive or random objective selection + action selection
-        int action = actionSelection(Qs);
+        int action = selectBestAction(Qs);
         //random
 
 
-        prevAction = action;*/
+        previousAction = action;*/
     }
 }

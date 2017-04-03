@@ -5,11 +5,8 @@ import problem.learning.DoubleHashTable;
 import problem.learning.SimilarityType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-
-import static java.lang.Math.sqrt;
 
 /**
  * Created by Lev Levin on 15/07/2016.
@@ -40,7 +37,7 @@ public class QTablePredator extends TCPredator {
     @Override
     public int act() {
         prevState = getCurrentState();
-        return prevAction;
+        return previousAction;
     }
 
     @Override
@@ -51,7 +48,7 @@ public class QTablePredator extends TCPredator {
         ArrayList<Integer> bestActions = new ArrayList<>();
 
         // Calculates max_A' Q(S',A')
-        for(int i=0; i<prob.getNumActions(); i++){
+        for(int i = 0; i< p_problemWorld.getNumActions(); i++){
             double value = qTable.get(new StateAction(currentState, i));
             if(value >= best) {
                 if (value > best) {
@@ -68,14 +65,14 @@ public class QTablePredator extends TCPredator {
             best = 0;
         }
 
-        StateAction currentStateAction = new StateAction(prevState, prevAction);
+        StateAction currentStateAction = new StateAction(prevState, previousAction);
         double oldQValue = qTable.get(currentStateAction);
         double error = (reward + gamma * best - oldQValue);
         double newValue = oldQValue + alpha * error;
 
         qTable.put(currentStateAction, newValue);
         updatesNumber++;
-        updateQBySimilarity(prevState, prevAction, error, similarityType);
+        updateQBySimilarity(prevState, previousAction, error, similarityType);
 
         //action selection
         selectBestAction(bestActions, epsilon);
@@ -87,7 +84,7 @@ public class QTablePredator extends TCPredator {
         double best = -Double.MAX_VALUE;
         ArrayList<Integer> bestActions = new ArrayList<>();
 
-        for(int i=0; i<prob.getNumActions(); i++){
+        for(int i = 0; i< p_problemWorld.getNumActions(); i++){
             double value = qTable.get(new StateAction(currentState, i));
             if(value >= best) {
                 if (value > best) {
@@ -136,10 +133,10 @@ public class QTablePredator extends TCPredator {
             action = bestActions.get(RNG.randomInt(bestActions.size()));
             //random
         } else {
-            action = RNG.randomInt(prob.getNumActions());
+            action = RNG.randomInt(p_problemWorld.getNumActions());
         }
 
-        prevAction = action;
+        previousAction = action;
     }
 
     @Override
@@ -163,7 +160,7 @@ public class QTablePredator extends TCPredator {
     protected void transactionUpdate(State state, int action, double error) {
         // update all neighbors of the target cell (the other 3 neighbors, with the similar action which brings the problem.predator to the same state)
         Map<Integer, State> similarTransactions = new Hashtable<>();
-        SimilarityFunctions.getSimilarTransactions(state, action, ((PredatorWorld) prob).getSize(), similarTransactions);
+        SimilarityFunctions.getSimilarTransactions(state, action, ((PredatorWorld) p_problemWorld).getWorldSize(), similarTransactions);
 
         for (Map.Entry<Integer, State> entry : similarTransactions.entrySet()) {
             updateQtableValue(error, entry.getKey(), entry.getValue(), transactionSimilartyFactor);
@@ -183,7 +180,7 @@ public class QTablePredator extends TCPredator {
         // 90, 180, 270 degree rotation similarity
         State rotatedState = state;
         for (int i = 0; i < 3; i++) {
-            rotatedState = SimilarityFunctions.get90DegreeRotationState(rotatedState, ((PredatorWorld) prob).getSize());
+            rotatedState = SimilarityFunctions.get90DegreeRotationState(rotatedState, ((PredatorWorld) p_problemWorld).getWorldSize());
             int rotatedAction = SimilarityFunctions.get90DegreeRotationtAction(action);
 
             updateQtableValue(error, rotatedAction, rotatedState);

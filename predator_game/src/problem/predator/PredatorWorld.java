@@ -13,83 +13,83 @@ import problem.learning.Problem;
  * Updated by Moshe Cohen.
  */
 public class PredatorWorld extends Problem {
-    private int size;
-    private int nrPredators;
-    private Animal[][] map;
-    private Animal[] aPredators;
-    private Animal[] aPreys;
+    private int m_worldSize;  // the predator is a square with edge length of m_worldSize
+    private int m_numberOfPredators;
+    private Animal[][] m_worldGrid;
+    private Animal[] m_predators;
+    private Animal[] m_preys;
     
-    public PredatorWorld (int size, int nrPredators, IPredatorCreator predatorCreator) {
-        this.size = size;
-        this.nrPredators = nrPredators;
+    public PredatorWorld (int worldSize, int numberOfPredators, IPredatorCreator predatorCreator) {
+        this.m_worldSize = worldSize;
+        this.m_numberOfPredators = numberOfPredators;
         
-        this.map = new Animal[size][size];
+        this.m_worldGrid = new Animal[worldSize][worldSize];
         
-        this.aPredators = new Animal[nrPredators];
-        this.aPreys = new Animal[nrPredators-1];
-        for(int i=0; i<nrPredators; i++){
-            if(i < nrPredators-1){
+        this.m_predators = new Animal[numberOfPredators];
+        this.m_preys = new Animal[numberOfPredators-1];
+        for (int i = 0 ; i < numberOfPredators ; i++) {
+            if(i < numberOfPredators - 1) {
                 Animal a;
-                do{
-                    a = new Prey(this, size, RNG.randomInt(size), RNG.randomInt(size));
+                do {
+                    a = new Prey(this, worldSize, RNG.randomInt(worldSize), RNG.randomInt(worldSize));
                 } while (occupied(a));
-                this.aPreys[i] = a;
-                this.map[a.y][a.x] = a;
+                this.m_preys[i] = a;
+                this.m_worldGrid[a.y][a.x] = a;
             }
             Animal a;
             do{
-                a = predatorCreator.Create(this, size, RNG.randomInt(size), RNG.randomInt(size));
+                a = predatorCreator.Create(this, worldSize, RNG.randomInt(worldSize), RNG.randomInt(worldSize));
             } while (occupied(a));
-            this.aPredators[i] = a;
-            this.map[a.y][a.x] = a;
+            this.m_predators[i] = a;
+            this.m_worldGrid[a.y][a.x] = a;
         }
     }
     
-    public int getSize() {
-        return size;
+    public int getWorldSize() {
+        return m_worldSize;
     }
     
     public int getNumStates() {
-        return size * size;
+        return m_worldSize * m_worldSize;
     }
 
-    // Initialize the world again, randomly placing the predators and prey
+    // Initialize the world again, randomly placing the m_predators and prey
     public void reset(){
-        this.map = new Animal[size][size];
-        for(int i=0; i<nrPredators; i++){
-            if(i < nrPredators-1){
-                aPreys[i].x = -1;
-                aPreys[i].y = -1;
+        this.m_worldGrid = new Animal[m_worldSize][m_worldSize];
+        for(int i = 0; i< m_numberOfPredators; i++){
+            if(i < m_numberOfPredators -1){
+                m_preys[i].x = -1;
+                m_preys[i].y = -1;
             }
-            aPredators[i].x = -1;
-            aPredators[i].y = -1;
-            aPredators[i].resetEs();
+            m_predators[i].x = -1;
+            m_predators[i].y = -1;
+            m_predators[i].resetEs();
         }
-        for(int i=0; i<nrPredators; i++){
-            if(i < nrPredators-1){
+        for(int i = 0; i< m_numberOfPredators; i++){
+            if(i < m_numberOfPredators -1){
                 do{
-                    aPreys[i].x = RNG.randomInt(size);
-                    aPreys[i].y = RNG.randomInt(size);
-                } while (occupied(aPreys[i]));
-                this.map[aPreys[i].y][aPreys[i].x] = aPreys[i];
+                    m_preys[i].x = RNG.randomInt(m_worldSize);
+                    m_preys[i].y = RNG.randomInt(m_worldSize);
+                } while (occupied(m_preys[i]));
+                this.m_worldGrid[m_preys[i].y][m_preys[i].x] = m_preys[i];
             }
             do{
-                aPredators[i].x = RNG.randomInt(size);
-                aPredators[i].y = RNG.randomInt(size);
-            } while (occupied(aPredators[i]));
-            this.map[aPredators[i].y][aPredators[i].x] = aPredators[i];
+                m_predators[i].x = RNG.randomInt(m_worldSize);
+                m_predators[i].y = RNG.randomInt(m_worldSize);
+            } while (occupied(m_predators[i]));
+            this.m_worldGrid[m_predators[i].y][m_predators[i].x] = m_predators[i];
         }
     }
     
     public boolean occupied(Animal a){
-        return map[a.y][a.x] != null;
+        return m_worldGrid[a.y][a.x] != null;
     }
     
     //moves a problem.predator or prey, checking whether
     public void move(Animal a, boolean isLearningStage){
         int x = a.x;
         int y = a.y;
-        this.map[a.y][a.x] = null;
+        this.m_worldGrid[a.y][a.x] = null;
         int dir = a.act();
         
         switch(dir){
@@ -99,7 +99,7 @@ public class PredatorWorld extends Problem {
                 }
                 break;
             case 1: //DOWN
-                if(a.y < size-1){
+                if(a.y < m_worldSize -1){
                     a.y++;
                 }
                 break;
@@ -109,14 +109,14 @@ public class PredatorWorld extends Problem {
                 }
                 break;
             case 3: //RIGHT
-                if(a.x < size-1){
+                if(a.x < m_worldSize -1){
                     a.x++;
                 }
                 break;
         }
         //if available, move onto location
-        if(this.map[a.y][a.x] == null){
-            this.map[a.y][a.x] = a;
+        if(this.m_worldGrid[a.y][a.x] == null){
+            this.m_worldGrid[a.y][a.x] = a;
             if(a.predator && isLearningStage){
                 a.reward(0);
             }
@@ -124,13 +124,13 @@ public class PredatorWorld extends Problem {
                 a.selectAction();
             }
         //if this is a problem.predator, and the next location holds a prey, move onto location
-        } else if(!this.map[a.y][a.x].predator && a.predator){
-            this.map[a.y][a.x] = a;
+        } else if(!this.m_worldGrid[a.y][a.x].predator && a.predator){
+            this.m_worldGrid[a.y][a.x] = a;
         } else {
             //otherwise, do not move problem.predator
             a.y = y;
             a.x = x;
-            this.map[a.y][a.x] = a;
+            this.m_worldGrid[a.y][a.x] = a;
             if(a.predator && isLearningStage){
                 a.reward(0);
             }
@@ -141,19 +141,19 @@ public class PredatorWorld extends Problem {
     }
     
     public Animal[] getPredators() {
-        return aPredators;
+        return m_predators;
     }
     
     public Animal[] getPreys() {
-        return aPreys;
+        return m_preys;
     }
 
     @Override
     public void update(boolean isLearningStage) {
-        for (Animal aPrey : aPreys) {
+        for (Animal aPrey : m_preys) {
             move(aPrey, isLearningStage);
         }
-        for (Animal aPredator : aPredators) {
+        for (Animal aPredator : m_predators) {
             move(aPredator, isLearningStage);
         }
     }
@@ -167,9 +167,9 @@ public class PredatorWorld extends Problem {
 
         System.out.println("Iteration - " + iteration);
 
-        // if the prey was caught, reward the predators with a 1
+        // if the prey was caught, reward the m_predators with a 1
         if(isGoalReached() && isLearningStage) {
-            for (Animal aPredator : aPredators) {
+            for (Animal aPredator : m_predators) {
                 aPredator.reward(1);
             }
         }
@@ -178,8 +178,8 @@ public class PredatorWorld extends Problem {
     
     //check if the prey is caught
     public boolean isGoalReached(){
-        for (Animal aPredator : aPredators) {
-            for (Animal aPrey : aPreys) {
+        for (Animal aPredator : m_predators) {
+            for (Animal aPrey : m_preys) {
                 if (aPredator.x == aPrey.x && aPredator.y == aPrey.y) {
                     return true;
                 }
@@ -191,16 +191,16 @@ public class PredatorWorld extends Problem {
     // print world
     public String toString(){
         StringBuilder s = new StringBuilder();
-        for(int i=0; i<size; i++){
-            for(int j=0; j<size; j++){
+        for(int i = 0; i< m_worldSize; i++){
+            for(int j = 0; j< m_worldSize; j++){
                 boolean set = false;
-                for(int l=0; l<aPredators.length; l++){
-                    if(aPredators[l] != null && aPredators[l].x == j && aPredators[l].y == i){
+                for(int l = 0; l< m_predators.length; l++){
+                    if(m_predators[l] != null && m_predators[l].x == j && m_predators[l].y == i){
                         s.append("x");
                         set = true;
                         break;
                     }
-                    if(l < aPreys.length && aPreys[l] != null && aPreys[l].x == j && aPreys[l].y == i){
+                    if(l < m_preys.length && m_preys[l] != null && m_preys[l].x == j && m_preys[l].y == i){
                         s.append("O");
                         set = true;
                         break;
